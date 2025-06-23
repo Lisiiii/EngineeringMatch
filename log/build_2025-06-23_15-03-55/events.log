@@ -1,0 +1,145 @@
+[0.000000] (-) TimerEvent: {}
+[0.000453] (location) JobQueued: {'identifier': 'location', 'dependencies': OrderedDict()}
+[0.000585] (location) JobStarted: {'identifier': 'location'}
+[0.007169] (location) JobProgress: {'identifier': 'location', 'progress': 'cmake'}
+[0.007839] (location) JobProgress: {'identifier': 'location', 'progress': 'build'}
+[0.008491] (location) Command: {'cmd': ['/usr/bin/cmake', '--build', '/workspaces/engineeringMatch/build/location', '--', '-j12', '-l12'], 'cwd': '/workspaces/engineeringMatch/build/location', 'env': OrderedDict([('HOSTNAME', 'lisii-RedmiBook-Pro15'), ('GIT_ASKPASS', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/extensions/git/dist/askpass.sh'), ('SHLVL', '3'), ('LD_LIBRARY_PATH', '/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/bin/helpers/browser.sh'), ('HOME', '/root'), ('OLDPWD', '/workspaces/engineeringMatch'), ('TERM_PROGRAM_VERSION', '1.100.2'), ('VSCODE_IPC_HOOK_CLI', '/tmp/vscode-ipc-1642deab-a5ed-4639-b132-33a6c8b3a72f.sock'), ('ZSH', '/root/.oh-my-zsh'), ('LSCOLORS', 'Gxfxcxdxbxegedabagacad'), ('PAGER', 'more'), ('ROS_PYTHON_VERSION', '3'), ('VSCODE_GIT_ASKPASS_MAIN', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/extensions/git/dist/askpass-main.js'), ('VSCODE_GIT_ASKPASS_NODE', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/node'), ('REMOTE_CONTAINERS', 'true'), ('COLORTERM', 'truecolor'), ('ROS_DISTRO', 'humble'), ('WAYLAND_DISPLAY', 'vscode-wayland-bf70c69c-0ea2-4665-b054-dae2c4cd3ad4.sock'), ('REMOTE_CONTAINERS_IPC', '/tmp/vscode-remote-containers-ipc-380d1b73-ae63-4773-8a7a-f764bfa5b993.sock'), ('LOGNAME', 'root'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('USER_ZDOTDIR', '/root'), ('TERM', 'xterm-256color'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/bin/remote-cli:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand'), ('XDG_RUNTIME_DIR', '/tmp/user/0'), ('DISPLAY', ':0'), ('REMOTE_CONTAINERS_SOCKETS', '["/tmp/vscode-ssh-auth-380d1b73-ae63-4773-8a7a-f764bfa5b993.sock","/root/.gnupg/S.gpg-agent"]'), ('LANG', 'C.UTF-8'), ('VSCODE_INJECTION', '1'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('TERM_PROGRAM', 'vscode'), ('VSCODE_GIT_IPC_HANDLE', '/tmp/user/0/vscode-git-3ce8e7c28d.sock'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('SSH_AUTH_SOCK', '/tmp/vscode-ssh-auth-380d1b73-ae63-4773-8a7a-f764bfa5b993.sock'), ('SHELL', '/bin/zsh'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('LC_ALL', 'C.UTF-8'), ('PWD', '/workspaces/engineeringMatch/build/location'), ('ZDOTDIR', '/root'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[0.052808] (location) StdoutLine: {'line': b'\x1b[35m\x1b[1mConsolidate compiler generated dependencies of target location\x1b[0m\n'}
+[0.076588] (location) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/location.dir/src/main.cpp.o\x1b[0m\n'}
+[0.099830] (-) TimerEvent: {}
+[0.200152] (-) TimerEvent: {}
+[0.300468] (-) TimerEvent: {}
+[0.400856] (-) TimerEvent: {}
+[0.501174] (-) TimerEvent: {}
+[0.601603] (-) TimerEvent: {}
+[0.702115] (-) TimerEvent: {}
+[0.802480] (-) TimerEvent: {}
+[0.902844] (-) TimerEvent: {}
+[1.003295] (-) TimerEvent: {}
+[1.103572] (-) TimerEvent: {}
+[1.203852] (-) TimerEvent: {}
+[1.304125] (-) TimerEvent: {}
+[1.404492] (-) TimerEvent: {}
+[1.504895] (-) TimerEvent: {}
+[1.605247] (-) TimerEvent: {}
+[1.705557] (-) TimerEvent: {}
+[1.805989] (-) TimerEvent: {}
+[1.906669] (-) TimerEvent: {}
+[2.007455] (-) TimerEvent: {}
+[2.108137] (-) TimerEvent: {}
+[2.208764] (-) TimerEvent: {}
+[2.309300] (-) TimerEvent: {}
+[2.409904] (-) TimerEvent: {}
+[2.510567] (-) TimerEvent: {}
+[2.610936] (-) TimerEvent: {}
+[2.711384] (-) TimerEvent: {}
+[2.811814] (-) TimerEvent: {}
+[2.912313] (-) TimerEvent: {}
+[3.012753] (-) TimerEvent: {}
+[3.113286] (-) TimerEvent: {}
+[3.213791] (-) TimerEvent: {}
+[3.314236] (-) TimerEvent: {}
+[3.414633] (-) TimerEvent: {}
+[3.514945] (-) TimerEvent: {}
+[3.615639] (-) TimerEvent: {}
+[3.716220] (-) TimerEvent: {}
+[3.816605] (-) TimerEvent: {}
+[3.917014] (-) TimerEvent: {}
+[4.017461] (-) TimerEvent: {}
+[4.117967] (-) TimerEvent: {}
+[4.218636] (-) TimerEvent: {}
+[4.319041] (-) TimerEvent: {}
+[4.419411] (-) TimerEvent: {}
+[4.519938] (-) TimerEvent: {}
+[4.620414] (-) TimerEvent: {}
+[4.720905] (-) TimerEvent: {}
+[4.821360] (-) TimerEvent: {}
+[4.922050] (-) TimerEvent: {}
+[5.022521] (-) TimerEvent: {}
+[5.122973] (-) TimerEvent: {}
+[5.223514] (-) TimerEvent: {}
+[5.323921] (-) TimerEvent: {}
+[5.424207] (-) TimerEvent: {}
+[5.524482] (-) TimerEvent: {}
+[5.624776] (-) TimerEvent: {}
+[5.725085] (-) TimerEvent: {}
+[5.825420] (-) TimerEvent: {}
+[5.925774] (-) TimerEvent: {}
+[6.026058] (-) TimerEvent: {}
+[6.126363] (-) TimerEvent: {}
+[6.226669] (-) TimerEvent: {}
+[6.327007] (-) TimerEvent: {}
+[6.427297] (-) TimerEvent: {}
+[6.527581] (-) TimerEvent: {}
+[6.627926] (-) TimerEvent: {}
+[6.728239] (-) TimerEvent: {}
+[6.828517] (-) TimerEvent: {}
+[6.928840] (-) TimerEvent: {}
+[7.029188] (-) TimerEvent: {}
+[7.129761] (-) TimerEvent: {}
+[7.230056] (-) TimerEvent: {}
+[7.330339] (-) TimerEvent: {}
+[7.430604] (-) TimerEvent: {}
+[7.530893] (-) TimerEvent: {}
+[7.631172] (-) TimerEvent: {}
+[7.731455] (-) TimerEvent: {}
+[7.831751] (-) TimerEvent: {}
+[7.932044] (-) TimerEvent: {}
+[8.032340] (-) TimerEvent: {}
+[8.132624] (-) TimerEvent: {}
+[8.232911] (-) TimerEvent: {}
+[8.333213] (-) TimerEvent: {}
+[8.433503] (-) TimerEvent: {}
+[8.533836] (-) TimerEvent: {}
+[8.634125] (-) TimerEvent: {}
+[8.734401] (-) TimerEvent: {}
+[8.834669] (-) TimerEvent: {}
+[8.934947] (-) TimerEvent: {}
+[9.035229] (-) TimerEvent: {}
+[9.135517] (-) TimerEvent: {}
+[9.235803] (-) TimerEvent: {}
+[9.336079] (-) TimerEvent: {}
+[9.436370] (-) TimerEvent: {}
+[9.536665] (-) TimerEvent: {}
+[9.636943] (-) TimerEvent: {}
+[9.737231] (-) TimerEvent: {}
+[9.837527] (-) TimerEvent: {}
+[9.937828] (-) TimerEvent: {}
+[10.038135] (-) TimerEvent: {}
+[10.138409] (-) TimerEvent: {}
+[10.238683] (-) TimerEvent: {}
+[10.338923] (-) TimerEvent: {}
+[10.439196] (-) TimerEvent: {}
+[10.539467] (-) TimerEvent: {}
+[10.639743] (-) TimerEvent: {}
+[10.740071] (-) TimerEvent: {}
+[10.780117] (location) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking CXX executable location\x1b[0m\n'}
+[10.840165] (-) TimerEvent: {}
+[10.940446] (-) TimerEvent: {}
+[11.040722] (-) TimerEvent: {}
+[11.122745] (location) StdoutLine: {'line': b'[100%] Built target location\n'}
+[11.132598] (location) CommandEnded: {'returncode': 0}
+[11.133105] (location) JobProgress: {'identifier': 'location', 'progress': 'install'}
+[11.140023] (location) Command: {'cmd': ['/usr/bin/cmake', '--install', '/workspaces/engineeringMatch/build/location'], 'cwd': '/workspaces/engineeringMatch/build/location', 'env': OrderedDict([('HOSTNAME', 'lisii-RedmiBook-Pro15'), ('GIT_ASKPASS', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/extensions/git/dist/askpass.sh'), ('SHLVL', '3'), ('LD_LIBRARY_PATH', '/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('BROWSER', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/bin/helpers/browser.sh'), ('HOME', '/root'), ('OLDPWD', '/workspaces/engineeringMatch'), ('TERM_PROGRAM_VERSION', '1.100.2'), ('VSCODE_IPC_HOOK_CLI', '/tmp/vscode-ipc-1642deab-a5ed-4639-b132-33a6c8b3a72f.sock'), ('ZSH', '/root/.oh-my-zsh'), ('LSCOLORS', 'Gxfxcxdxbxegedabagacad'), ('PAGER', 'more'), ('ROS_PYTHON_VERSION', '3'), ('VSCODE_GIT_ASKPASS_MAIN', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/extensions/git/dist/askpass-main.js'), ('VSCODE_GIT_ASKPASS_NODE', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/node'), ('REMOTE_CONTAINERS', 'true'), ('COLORTERM', 'truecolor'), ('ROS_DISTRO', 'humble'), ('WAYLAND_DISPLAY', 'vscode-wayland-bf70c69c-0ea2-4665-b054-dae2c4cd3ad4.sock'), ('REMOTE_CONTAINERS_IPC', '/tmp/vscode-remote-containers-ipc-380d1b73-ae63-4773-8a7a-f764bfa5b993.sock'), ('LOGNAME', 'root'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('USER_ZDOTDIR', '/root'), ('TERM', 'xterm-256color'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/vscode/vscode-server/bin/linux-x64/848b80aeb52026648a8ff9f7c45a9b0a80641e2e/bin/remote-cli:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand'), ('XDG_RUNTIME_DIR', '/tmp/user/0'), ('DISPLAY', ':0'), ('REMOTE_CONTAINERS_SOCKETS', '["/tmp/vscode-ssh-auth-380d1b73-ae63-4773-8a7a-f764bfa5b993.sock","/root/.gnupg/S.gpg-agent"]'), ('LANG', 'C.UTF-8'), ('VSCODE_INJECTION', '1'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('TERM_PROGRAM', 'vscode'), ('VSCODE_GIT_IPC_HANDLE', '/tmp/user/0/vscode-git-3ce8e7c28d.sock'), ('AMENT_PREFIX_PATH', '/opt/ros/humble'), ('SSH_AUTH_SOCK', '/tmp/vscode-ssh-auth-380d1b73-ae63-4773-8a7a-f764bfa5b993.sock'), ('SHELL', '/bin/zsh'), ('VSCODE_GIT_ASKPASS_EXTRA_ARGS', ''), ('LC_ALL', 'C.UTF-8'), ('PWD', '/workspaces/engineeringMatch/build/location'), ('ZDOTDIR', '/root'), ('PYTHONPATH', '/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/opt/ros/humble')]), 'shell': False}
+[11.140964] (-) TimerEvent: {}
+[11.147265] (location) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[11.147585] (location) StdoutLine: {'line': b'-- Execute custom install script\n'}
+[11.147826] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/lib/location/location\n'}
+[11.148220] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/ament_index/resource_index/package_run_dependencies/location\n'}
+[11.148376] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/ament_index/resource_index/parent_prefix_path/location\n'}
+[11.148515] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/ament_prefix_path.sh\n'}
+[11.148637] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/ament_prefix_path.dsv\n'}
+[11.148772] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/path.sh\n'}
+[11.148882] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/path.dsv\n'}
+[11.149005] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.bash\n'}
+[11.149111] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.sh\n'}
+[11.149200] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.zsh\n'}
+[11.149301] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.dsv\n'}
+[11.149386] (location) StdoutLine: {'line': b'-- Symlinking: /workspaces/engineeringMatch/install/share/location/package.dsv\n'}
+[11.158783] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/ament_index/resource_index/packages/location\n'}
+[11.159020] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/cmake/locationConfig.cmake\n'}
+[11.159125] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/cmake/locationConfig-version.cmake\n'}
+[11.159204] (location) StdoutLine: {'line': b'-- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/package.xml\n'}
+[11.160949] (location) CommandEnded: {'returncode': 0}
+[11.175974] (location) JobEnded: {'identifier': 'location', 'rc': 0}
+[11.177458] (-) EventReactorShutdown: {}

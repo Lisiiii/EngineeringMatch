@@ -1,0 +1,26 @@
+[0.009s] Invoking command in '/workspaces/engineeringMatch/build/location': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /workspaces/engineeringMatch/build/location -- -j12 -l12
+[0.049s] [35m[1mConsolidate compiler generated dependencies of target location[0m
+[0.067s] [ 50%] [32mBuilding CXX object CMakeFiles/location.dir/src/main.cpp.o[0m
+[2.144s] [100%] [32m[1mLinking CXX executable location[0m
+[2.268s] [100%] Built target location
+[2.280s] Invoked command in '/workspaces/engineeringMatch/build/location' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /workspaces/engineeringMatch/build/location -- -j12 -l12
+[2.290s] Invoking command in '/workspaces/engineeringMatch/build/location': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /workspaces/engineeringMatch/build/location
+[2.297s] -- Install configuration: ""
+[2.297s] -- Execute custom install script
+[2.297s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/lib/location/location
+[2.297s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/ament_index/resource_index/package_run_dependencies/location
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/ament_index/resource_index/parent_prefix_path/location
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/ament_prefix_path.sh
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/ament_prefix_path.dsv
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/path.sh
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/environment/path.dsv
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.bash
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.sh
+[2.298s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.zsh
+[2.299s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/local_setup.dsv
+[2.299s] -- Symlinking: /workspaces/engineeringMatch/install/share/location/package.dsv
+[2.307s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/ament_index/resource_index/packages/location
+[2.307s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/cmake/locationConfig.cmake
+[2.307s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/cmake/locationConfig-version.cmake
+[2.308s] -- Up-to-date symlink: /workspaces/engineeringMatch/install/share/location/package.xml
+[2.309s] Invoked command in '/workspaces/engineeringMatch/build/location' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /workspaces/engineeringMatch/build/location
