@@ -1,5 +1,0 @@
-In file included from [01m[K/workspaces/engineeringMatch/ws/location/src/main.cpp:2[m[K:
-[01m[K/workspaces/engineeringMatch/ws/location/src/imu/imu_handler.hpp:[m[K In member function ‘[01m[Kvoid engineering_match::imu::IMUHandler::data_callback(std_msgs::msg::Int32_<std::allocator<void> >::SharedPtr)[m[K’:
-[01m[K/workspaces/engineeringMatch/ws/location/src/imu/imu_handler.hpp:14:62:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kmsg[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-parameter-Wunused-parameter]8;;[m[K]
-   14 |     void data_callback([01;35m[Kconst std_msgs::msg::Int32::SharedPtr msg[m[K)
-      |                        [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~[m[K
