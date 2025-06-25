@@ -14,12 +14,9 @@ namespace engineering_match::imu {
 class IMUHandler : public base::IMonoBehaviour {
 public:
     IMUHandler(const std::string& name, float update_rate)
-        : base::IMonoBehaviour(name)
+        : base::IMonoBehaviour(name, update_rate)
     {
         start();
-        update_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(static_cast<int>(1000 / update_rate)),
-            std::bind(&IMUHandler::update, this));
     };
 
     void imu_data_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg)

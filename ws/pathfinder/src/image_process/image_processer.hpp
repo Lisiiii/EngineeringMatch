@@ -78,12 +78,9 @@ public:
 class ImageProcesser : public base::IMonoBehaviour {
 public:
     ImageProcesser(const std::string& name, float update_rate)
-        : base::IMonoBehaviour(name)
+        : base::IMonoBehaviour(name, update_rate)
     {
         start();
-        update_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(static_cast<int>(1000 / update_rate)),
-            std::bind(&ImageProcesser::update, this));
     };
 
     void start() override
@@ -94,11 +91,7 @@ public:
         RCLCPP_INFO(this->get_logger(), "started.");
     };
 
-    void update() override
-    {
-        RCLCPP_INFO(rclcpp::get_logger("ImageProcesser"), "ImageProcesser update called.");
-        // This method can be used for periodic tasks if needed
-    };
+    void update() override {};
 
     void image_data_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {

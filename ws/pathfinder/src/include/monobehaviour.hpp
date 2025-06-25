@@ -12,8 +12,13 @@ namespace engineering_match::base {
 
 class IMonoBehaviour : public rclcpp::Node {
 public:
-    IMonoBehaviour(const std::string& node_name)
-        : rclcpp::Node(node_name) {};
+    IMonoBehaviour(const std::string& node_name, float update_rate)
+        : rclcpp::Node(node_name)
+    {
+        update_timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(static_cast<int>(1000 / update_rate)),
+            [this]() { update(); });
+    };
     virtual ~IMonoBehaviour() = default;
     virtual void start() {};
     virtual void update() {};
