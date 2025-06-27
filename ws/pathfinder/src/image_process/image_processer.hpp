@@ -78,10 +78,7 @@ public:
 class ImageProcesser : public base::IMonoBehaviour {
 public:
     ImageProcesser(const std::string& name, float update_rate)
-        : base::IMonoBehaviour(name, update_rate)
-    {
-        start();
-    };
+        : base::IMonoBehaviour(name, update_rate) {};
 
     void start() override
     {

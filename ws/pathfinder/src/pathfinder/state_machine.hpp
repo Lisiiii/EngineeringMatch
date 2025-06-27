@@ -119,8 +119,9 @@ private:
         = NOTSTART;
     bool if_barrier_;
 
-    struct StageBehaviour {
-        int stage = 0;
+    struct Stage {
+        int current_stage = 0;
+        std::vector<std::function<int()>> stages;
         std::function<void()> enter;
         std::function<void()> update;
         std::function<void()> exit;
@@ -135,12 +136,13 @@ private:
     };
 
     Behavior behaviors_;
-    std::unordered_map<StageType, StageBehaviour> stages_;
+    std::unordered_map<StageType, Stage> stages_;
 
     void initialize();
 
     void transitionTo(StageType new_stage)
     {
+        RCLCPP_INFO(this->get_logger(), "Transitioning to stage: %d", static_cast<int>(current_stage_));
         if (stages_[current_stage_].exit == nullptr) {
             RCLCPP_ERROR(this->get_logger(), "No exit function defined for stage: %d", static_cast<int>(current_stage_));
             return;
@@ -151,7 +153,6 @@ private:
             RCLCPP_ERROR(this->get_logger(), "No enter function defined for stage: %d", static_cast<int>(current_stage_));
             return;
         }
-        RCLCPP_INFO(this->get_logger(), "Transitioning to stage: %d", static_cast<int>(current_stage_));
         stages_[current_stage_].enter();
     }
 
@@ -252,6 +253,7 @@ void inline StateMachine::initialize()
     // initialize stages
     stages_[StageType::STARTUP] = {
         0,
+        {},
         [this] {
             if (true) { // Replace with actual condition
                 transitionTo(StageType::GET_AND_PLACE_A_POINT);
@@ -264,94 +266,54 @@ void inline StateMachine::initialize()
     };
     stages_[StageType::GET_AND_PLACE_A_POINT] = {
         0,
-        [] {}, // enter
-        [this] {
-            auto& stage = stages_[current_stage_].stage;
-            switch (stage) {
-            case 0: {
-                if (behaviors_.moving(DirectionType::FORWARD, LocationType::APOINT))
-                    ++stage;
-                break;
-            }
-            case 1: {
+        {
+            [this] { return static_cast<int>(behaviors_.moving(DirectionType::FORWARD, LocationType::APOINT)); },
+            [this] {
                 bool clamped = behaviors_.clamping(DirectionType::FORWARD, false);
                 bool has_colors = !forward_clamped_colors_.empty();
-                if (clamped && has_colors) {
-                    stage += if_barrier_ ? 1 : 5;
-                }
-                break;
-            }
-            case 2: {
-                if (behaviors_.rotating(DeviceType::CAR))
-                    ++stage;
-                break;
-            }
-            case 3: {
-                if (behaviors_.moving(DirectionType::BACKWARD, color_to_point_[forward_clamped_colors_.front()]))
-                    ++stage;
-                break;
-            }
-            case 4: {
-                if (behaviors_.clamping(DirectionType::BACKWARD, false))
-                    ++stage;
-                break;
-            }
-            case 5: {
-                if (behaviors_.rotating(DeviceType::CAR))
-                    ++stage;
-                break;
-            }
-            case 6: {
-                if (behaviors_.moving(DirectionType::FORWARD, color_to_target_[forward_clamped_colors_.front()]))
-                    ++stage;
-                break;
-            }
-            case 7: {
+                return if_barrier_ ? static_cast<int>(clamped && has_colors) : static_cast<int>(clamped && has_colors) * 5;
+            },
+            [this] { return static_cast<int>(behaviors_.rotating(DeviceType::CAR)); },
+            [this] { return static_cast<int>(behaviors_.moving(DirectionType::BACKWARD, color_to_point_[forward_clamped_colors_.front()])); },
+            [this] { return static_cast<int>(behaviors_.clamping(DirectionType::BACKWARD, false)); },
+            [this] { return static_cast<int>(behaviors_.rotating(DeviceType::CAR)); },
+            [this] { return static_cast<int>(behaviors_.moving(DirectionType::FORWARD, color_to_target_[forward_clamped_colors_.front()])); },
+            [this] {
                 if (behaviors_.placing(DirectionType::FORWARD, false)) {
                     forward_clamped_colors_.erase(forward_clamped_colors_.begin());
-                    if (if_barrier_) {
-                        ++stage;
-                    } else {
-                        stage = -1;
-                    }
-                }
-                break;
-            }
-            case 8: {
-                if (behaviors_.moving(DirectionType::BACKWARD, LocationType::SOLIDDISTANCE))
-                    ++stage;
-                break;
-            }
-            case 9: {
-                if (behaviors_.placing(DirectionType::BACKWARD, false)) {
-                    backward_clamped_colors_.erase(backward_clamped_colors_.begin());
-                    ++stage;
-                }
-                break;
-            }
-            case 10: {
-                if (behaviors_.moving(DirectionType::FORWARD, LocationType::SOLIDDISTANCE))
-                    ++stage;
-                break;
-            }
-            case 11: {
-                if (behaviors_.rotating(DeviceType::CAR))
-                    ++stage;
-                break;
-            }
-            case 12: {
+                    return if_barrier_ ? 1 : -100;
+                } else
+                    return 0;
+            },
+            [this] { return static_cast<int>(behaviors_.moving(DirectionType::BACKWARD, LocationType::SOLIDDISTANCE)); },
+            [this] { return static_cast<int>(behaviors_.placing(DirectionType::BACKWARD, false)); },
+            [this] { return static_cast<int>(behaviors_.moving(DirectionType::FORWARD, LocationType::SOLIDDISTANCE)); },
+            [this] { return static_cast<int>(behaviors_.rotating(DeviceType::CAR)); },
+            [this] {
                 if (behaviors_.clamping(DirectionType::FORWARD, false)) {
-                    ++stage;
                     if_barrier_ = false;
-                }
-                break;
-            }
-            default:
+                    return 1;
+                } else
+                    return 0;
+            },
+        },
+
+        [this] {
+            stages_[StageType::GET_AND_PLACE_A_POINT].current_stage = 0;
+        },
+        [this] {
+            auto stages = stages_[StageType::GET_AND_PLACE_A_POINT].stages;
+            auto& current_stage = stages_[StageType::GET_AND_PLACE_A_POINT].current_stage;
+
+            if (current_stage >= static_cast<int>(stages.size()) || current_stage < 0) {
                 transitionTo(StageType::GET_AND_PLACE_C_POINT);
-                break;
+                return;
             }
+            auto result = stages[current_stage]();
+            RCLCPP_INFO(this->get_logger(), "[Stage %d]Substage %d result: %d", static_cast<int>(current_stage_), current_stage, result);
+            current_stage += result;
         },
         [] {} // exit
     };
-}
+};
 }
