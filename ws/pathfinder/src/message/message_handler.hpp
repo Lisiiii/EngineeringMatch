@@ -28,10 +28,10 @@ public:
 
     void start() override
     {
-        this->create_subscription<std_msgs::msg::Float32MultiArray>(
+        imu_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
             "/unity/imu_data", 10,
             std::bind(&MessageHandler::imu_data_callback, this, std::placeholders::_1));
-        this->create_subscription<std_msgs::msg::Float32MultiArray>(
+        target_position_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
             "/unity/target_position", 10,
             std::bind(&MessageHandler::target_position_callback, this, std::placeholders::_1));
         publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>(
@@ -73,6 +73,9 @@ public:
 
 private:
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr publisher_;
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr imu_subscription_;
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr target_position_subscription_;
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr velocity_subscription_;
 
     void imu_data_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
     {
