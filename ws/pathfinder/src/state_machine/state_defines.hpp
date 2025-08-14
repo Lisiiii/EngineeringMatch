@@ -29,11 +29,8 @@ enum class StageType {
     PLACE_A_C_E_POINT,
     GET_AND_TEMPLY_PLACE_F_POINT,
     GET_AND_TEMPLY_PLACE_G_POINT,
-    COMPLETE_A,
-    COMPLETE_B,
-    COMPLETE_C,
-    COMPLETE_D,
-    COMPLETE_E,
+    COMPLETE_POINT,
+    IDLE,
 };
 
 struct LocationType {
@@ -68,18 +65,18 @@ inline LocationType Locations = {
     { 0.245f, 0.58f }, // BLACKTARGET
     { -0.245f, 0.58f }, // WHITETARGET
 };
-inline std::unordered_map<image::ColorRangeHSV::ColorType, cv::Point2f> color_to_target_ = {
-    { image::ColorRangeHSV::ColorType::RED, Locations.REDTARTGET },
-    { image::ColorRangeHSV::ColorType::GREEN, Locations.GREENTARGET },
-    { image::ColorRangeHSV::ColorType::BLUE, Locations.BLUETARGET },
-    { image::ColorRangeHSV::ColorType::WHITE, Locations.WHITETARGET },
-    { image::ColorRangeHSV::ColorType::BLACK, Locations.BLACKTARGET }
+inline std::unordered_map<image::Colors::ColorType, cv::Point2f> color_to_target_ = {
+    { image::Colors::ColorType::RED, Locations.REDTARTGET },
+    { image::Colors::ColorType::GREEN, Locations.GREENTARGET },
+    { image::Colors::ColorType::BLUE, Locations.BLUETARGET },
+    { image::Colors::ColorType::WHITE, Locations.WHITETARGET },
+    { image::Colors::ColorType::BLACK, Locations.BLACKTARGET }
 };
-inline std::unordered_map<image::ColorRangeHSV::ColorType, cv::Point2f> color_to_point_ = {
-    { image::ColorRangeHSV::ColorType::RED, Locations.APOINT },
-    { image::ColorRangeHSV::ColorType::GREEN, Locations.BPOINT },
-    { image::ColorRangeHSV::ColorType::BLUE, Locations.CPOINT },
-    { image::ColorRangeHSV::ColorType::WHITE, Locations.DPOINT },
-    { image::ColorRangeHSV::ColorType::BLACK, Locations.EPOINT }
+inline std::unordered_map<image::Colors::ColorType, cv::Point2f> color_to_point_ = {
+    { image::Colors::ColorType::RED, Locations.APOINT },
+    { image::Colors::ColorType::GREEN, Locations.BPOINT },
+    { image::Colors::ColorType::BLUE, Locations.CPOINT },
+    { image::Colors::ColorType::WHITE, Locations.DPOINT },
+    { image::Colors::ColorType::BLACK, Locations.EPOINT }
 };
 }

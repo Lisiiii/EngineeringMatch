@@ -31,9 +31,9 @@ struct LineType {
     }
 };
 
-class ColorRangeHSV {
+class Colors {
 public:
-    ColorRangeHSV() = default;
+    Colors() = default;
 
     enum class ColorType {
         CANTIDTIFY,
@@ -114,9 +114,10 @@ public:
         //     std::bind(&ImageProcesser::image_data_callback, this, std::placeholders::_1));
 
         // read video from file
-        // cap = cv::VideoCapture("/workspaces/engineeringMatch/test.mp4");
+        cap = cv::VideoCapture("/workspaces/engineeringMatch/test.mp4");
 
-        cap = cv::VideoCapture(0);
+        // cap = cv::VideoCapture(0);
+
         if (!cap.isOpened()) {
             RCLCPP_ERROR(this->get_logger(), "Failed to open video file.");
             return;
@@ -125,40 +126,40 @@ public:
         RCLCPP_INFO(this->get_logger(), "started.");
     };
 
-    void update() override {
-        // cv::Mat frame;
-        // if (!cap.read(frame)) {
-        //     RCLCPP_ERROR(this->get_logger(), "Failed to read frame from video.");
-        //     return;
-        // }
+    void update() override
+    {
 
-        // cv::Mat processed_image = post_process_image(frame);
-        // auto color = get_color(processed_image, cv::Point2f(processed_image.cols / 2.0f, processed_image.rows / 2.0f), 200.0f);
+        cv::Mat frame;
+        if (!cap.read(frame)) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to read frame from video.");
+            return;
+        }
+
+        cv::Mat processed_image = post_process_image(frame);
+        auto r_center = locate_target_center(processed_image, Colors::ColorType::RED);
+        auto g_center = locate_target_center(processed_image, Colors::ColorType::GREEN);
+        auto b_center = locate_target_center(processed_image, Colors::ColorType::BLUE);
+
+        cv::circle(processed_image, r_center, 5, cv::Scalar(0, 0, 255), -1);
+        cv::circle(processed_image, g_center, 5, cv::Scalar(0, 255, 0), -1);
+        cv::circle(processed_image, b_center, 5, cv::Scalar(255, 0, 0), -1);
+
+        cv::imshow("image", processed_image);
+        cv::waitKey(1);
     };
 
-    // void image_data_callback(const sensor_msgs::msg::Image::SharedPtr msg)
-    // {
-    //     RCLCPP_INFO(rclcpp::get_logger("ImageProcesser"), "Received image data with width: %d, height: %d",
-    //         msg->width, msg->height);
-    //     cv::Mat image_received = cv_bridge::toCvShare(msg, "bgr8")->image;
-    //     cv::cvtColor(image_received, image_received, cv::COLOR_BGR2RGB);
-    //     cv::flip(image_received, image_received, 0);
-
-    //     post_process_image(image_received);
-    // };
-
-    ColorRangeHSV::ColorType read_and_get_color()
+    Colors::ColorType read_and_get_color()
     {
         cv::Mat frame;
         if (!cap.read(frame)) {
             RCLCPP_ERROR(this->get_logger(), "Failed to read frame from video.");
-            return ColorRangeHSV::ColorType::CANTIDTIFY;
+            return Colors::ColorType::CANTIDTIFY;
         }
 
         cv::Mat processed_image = post_process_image(frame);
 
-        cv::imshow("image", processed_image);
-        cv::waitKey(0);
+        // cv::imshow("image", processed_image);
+        // cv::waitKey(1);
         auto color = get_color(processed_image, cv::Point2f(processed_image.cols / 2.0f, processed_image.rows / 2.0f), 200.0f);
         return color;
     };
@@ -174,19 +175,19 @@ private:
         return adjusted_image;
     };
 
-    ColorRangeHSV::ColorType get_color(cv::Mat& image, const cv::Point2f& point, const float& radius)
+    Colors::ColorType get_color(const cv::Mat& image, const cv::Point2f& point, const float& radius)
     {
         cv::Mat b_image, g_image, r_image;
 
-        ColorRangeHSV color_range;
+        Colors color_range;
         cv::Mat hsv_image;
         cv::cvtColor(image, hsv_image, cv::COLOR_BGR2HSV);
-        b_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::BLUE);
-        g_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::GREEN);
-        r_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::RED);
+        b_image = color_range.get_mask(hsv_image, Colors::ColorType::BLUE);
+        g_image = color_range.get_mask(hsv_image, Colors::ColorType::GREEN);
+        r_image = color_range.get_mask(hsv_image, Colors::ColorType::RED);
 
         cv::Rect roi = cv::Rect(point.x - radius, point.y - radius, radius * 2, radius * 2);
-        cv::rectangle(image, roi, cv::Scalar(255, 0, 0), 1);
+        // cv::rectangle(image, roi, cv::Scalar(255, 0, 0), 1);
 
         b_image = b_image(roi);
         g_image = g_image(roi);
@@ -196,14 +197,30 @@ private:
         int r_count = cv::countNonZero(r_image);
 
         if (b_count > g_count && b_count > r_count) {
-            return ColorRangeHSV::ColorType::BLUE;
+            return Colors::ColorType::BLUE;
         } else if (g_count > b_count && g_count > r_count) {
-            return ColorRangeHSV::ColorType::GREEN;
+            return Colors::ColorType::GREEN;
         } else if (r_count > b_count && r_count > g_count) {
-            return ColorRangeHSV::ColorType::RED;
+            return Colors::ColorType::RED;
         }
-        return ColorRangeHSV::ColorType::CANTIDTIFY;
+        return Colors::ColorType::CANTIDTIFY;
     };
+
+    cv::Point2f locate_target_center(cv::Mat& image, Colors::ColorType color)
+    {
+        cv::Mat hsv_image;
+        cv::cvtColor(image, hsv_image, cv::COLOR_BGR2HSV);
+        Colors color_range;
+        auto raw_colored = color_range.get_mask(hsv_image, color);
+
+        cv::Point2f aver_center = { 0, 0 };
+
+        cv::Moments m = cv::moments(raw_colored, true);
+        if (m.m00 != 0)
+            aver_center = cv::Point2f(static_cast<float>(m.m10 / m.m00), static_cast<float>(m.m01 / m.m00));
+
+        return aver_center;
+    }
 
     cv::Mat find_edges(const cv::Mat& image)
     {
@@ -253,9 +270,9 @@ private:
     cv::Mat visualize(const cv::Mat& image, const std::vector<LineType>& lines, const std::vector<cv::Point3f>& circles)
     {
         cv::Mat output_image = image.clone();
-        // for (const auto& line : lines) {
-        //     cv::line(output_image, line.start, line.end, cv::Scalar(0, 255, 0), 2);
-        // }
+        for (const auto& line : lines) {
+            cv::line(output_image, line.start, line.end, cv::Scalar(0, 255, 0), 2);
+        }
 
         for (const auto& circle : circles) {
             cv::circle(output_image, cv::Point(circle.x, circle.y), circle.z, cv::Scalar(255, 0, 0), 2);

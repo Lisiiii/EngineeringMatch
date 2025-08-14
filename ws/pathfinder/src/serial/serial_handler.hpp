@@ -125,12 +125,10 @@ private:
     {
         current_pos_rot_[0] = msg->data[0];
         current_pos_rot_[1] = msg->data[1];
-        RCLCPP_INFO(this->get_logger(), "Velocity received: [%f, %f]", current_pos_rot_[0], current_pos_rot_[1]);
     }
     void on_rotation_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
     {
         current_pos_rot_[2] = msg->data[0];
-        RCLCPP_INFO(this->get_logger(), "Rotation received: %f", current_pos_rot_[2]);
     }
     void on_command_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
     {
