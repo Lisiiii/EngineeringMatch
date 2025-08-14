@@ -1,95 +1,58 @@
 #pragma once
 
 #include "../include/monobehaviour.hpp"
-#include <memory>
-#include <opencv2/core/matx.hpp>
+#include <rclcpp/publisher.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/detail/float32_multi_array__struct.hpp>
 #include <std_msgs/msg/float32_multi_array.hpp>
 
-#include <opencv2/opencv.hpp>
-#include <vector>
-
-namespace engineering_match::data::message {
+namespace engineering_match::message {
 
 class MessageHandler : public base::IMonoBehaviour {
 public:
     MessageHandler(const std::string& name, float update_rate)
         : base::IMonoBehaviour(name, update_rate) {};
-
-    enum class MsgType {
-        IMU_DATA,
-        TARGET_POSITION,
-        VELOCITY_DATA,
-    };
-
-    std::vector<float> current_position_ = { 0.0f, 0.0f };
-    std::vector<float> target_position_ = { 0.0f, 0.0f };
-
     void start() override
     {
         imu_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
             "/unity/imu_data", 10,
             std::bind(&MessageHandler::imu_data_callback, this, std::placeholders::_1));
-        target_position_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-            "/unity/target_position", 10,
-            std::bind(&MessageHandler::target_position_callback, this, std::placeholders::_1));
-        publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>(
-            "/unity/velocity_data", 10);
+        position_publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>(
+            "/respi/position", 10);
+        rotation_publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>(
+            "/respi/rotation", 10);
 
         RCLCPP_INFO(this->get_logger(), "started.");
     };
 
-    bool publish_to_topic(MsgType type, const std::vector<float>& data)
+    void update() override
     {
-        switch (type) {
-        case MsgType::IMU_DATA: {
-            std_msgs::msg::Float32MultiArray msg;
-            msg.data = data;
-            publisher_->publish(msg);
-            RCLCPP_INFO(this->get_logger(), "Published IMU data: [%f, %f, %f]", data[0], data[1], data[2]);
-            return true;
-        }
-        case MsgType::TARGET_POSITION: {
-            std_msgs::msg::Float32MultiArray msg;
-            msg.data = data;
-            publisher_->publish(msg);
-            RCLCPP_INFO(this->get_logger(), "Published target position: [%f, %f]", data[0], data[1]);
-            return true;
-        }
-        case MsgType::VELOCITY_DATA:
-            std_msgs::msg::Float32MultiArray velocity_msg;
-            velocity_msg.data = data;
-            publisher_->publish(velocity_msg);
-            return true;
-        }
-    }
+        std_msgs::msg::Float32MultiArray position_msg;
+        position_msg.data = current_position_;
+        position_publisher_->publish(position_msg);
 
-    bool publish_to_serial(const std::vector<float>& velocity_data)
-    {
-        // TODO
-        return false;
+        std_msgs::msg::Float32MultiArray rotation_msg;
+        rotation_msg.data = { rotation_ };
+        rotation_publisher_->publish(rotation_msg);
     };
 
 private:
-    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr publisher_;
-    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr imu_subscription_;
-    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr target_position_subscription_;
-    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr velocity_subscription_;
-
     void imu_data_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
     {
-        RCLCPP_INFO(rclcpp::get_logger("IMUHandler"), "Received IMU data: [%f, %f, %f]",
-            msg->data[0], msg->data[1], msg->data[2]);
+        // RCLCPP_INFO(rclcpp::get_logger("IMUHandler"), "Received IMU data: [%f, %f, %f]",
+        //     msg->data[0], msg->data[1], msg->data[2]);
         // Process the IMU data and update current position
         current_position_ = std::vector<float> { msg->data[0], msg->data[1] };
+        rotation_ = msg->data[2];
     };
 
-    void target_position_callback(const std_msgs::msg::Float32MultiArray::SharedPtr msg) {
-        // RCLCPP_INFO(rclcpp::get_logger("IMUHandler"), "Received target position: [%f, %f]",
-        // msg->data[0], msg->data[1]);
-        // Update the target position
-        // target_position_ = std::vector<float> { msg->data[0], msg->data[1] };
-    };
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr position_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr rotation_publisher_;
+
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr imu_subscription_;
+
+    std::vector<float> current_position_ = { 0.0f, 0.0f };
+    std::vector<float> target_position_ = { 0.0f, 0.0f };
+    float rotation_ = 0.0f;
 };
 }

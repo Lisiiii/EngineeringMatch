@@ -6,6 +6,7 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/videoio.hpp>
 #include <rcl/publisher.h>
 #include <rcl/subscription.h>
 #include <rclcpp/logger.hpp>
@@ -35,6 +36,9 @@ public:
     ColorRangeHSV() = default;
 
     enum class ColorType {
+        CANTIDTIFY,
+        WHITE,
+        BLACK,
         RED,
         GREEN,
         BLUE,
@@ -53,7 +57,7 @@ public:
         { ColorType::RED, 0, 100, 100, 10, 255, 255 },
         { ColorType::RED, 160, 100, 100, 180, 255, 255 },
         { ColorType::GREEN, 40, 100, 100, 80, 255, 255 },
-        { ColorType::BLUE, 100, 100, 100, 140, 255, 255 },
+        { ColorType::BLUE, 94, 80, 2, 120, 255, 255 },
         { ColorType::YELLOW, 20, 100, 100, 30, 255, 255 },
         { ColorType::CYAN, 80, 100, 100, 90, 255, 255 },
         { ColorType::MAGENTA, 140, 100, 100, 160, 255, 255 }
@@ -101,70 +105,112 @@ public:
 
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscription_;
 
+    cv::VideoCapture cap {};
+
     void start() override
     {
-        image_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-            "/unity/camera/image_raw", 10,
-            std::bind(&ImageProcesser::image_data_callback, this, std::placeholders::_1));
+        // image_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
+        //     "/unity/camera/image_raw", 10,
+        //     std::bind(&ImageProcesser::image_data_callback, this, std::placeholders::_1));
+
+        // read video from file
+        // cap = cv::VideoCapture("/workspaces/engineeringMatch/test.mp4");
+
+        cap = cv::VideoCapture(0);
+        if (!cap.isOpened()) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to open video file.");
+            return;
+        }
+
         RCLCPP_INFO(this->get_logger(), "started.");
     };
 
-    void update() override {};
+    void update() override {
+        // cv::Mat frame;
+        // if (!cap.read(frame)) {
+        //     RCLCPP_ERROR(this->get_logger(), "Failed to read frame from video.");
+        //     return;
+        // }
 
-    void image_data_callback(const sensor_msgs::msg::Image::SharedPtr msg)
+        // cv::Mat processed_image = post_process_image(frame);
+        // auto color = get_color(processed_image, cv::Point2f(processed_image.cols / 2.0f, processed_image.rows / 2.0f), 200.0f);
+    };
+
+    // void image_data_callback(const sensor_msgs::msg::Image::SharedPtr msg)
+    // {
+    //     RCLCPP_INFO(rclcpp::get_logger("ImageProcesser"), "Received image data with width: %d, height: %d",
+    //         msg->width, msg->height);
+    //     cv::Mat image_received = cv_bridge::toCvShare(msg, "bgr8")->image;
+    //     cv::cvtColor(image_received, image_received, cv::COLOR_BGR2RGB);
+    //     cv::flip(image_received, image_received, 0);
+
+    //     post_process_image(image_received);
+    // };
+
+    ColorRangeHSV::ColorType read_and_get_color()
     {
-        RCLCPP_INFO(rclcpp::get_logger("ImageProcesser"), "Received image data with width: %d, height: %d",
-            msg->width, msg->height);
+        cv::Mat frame;
+        if (!cap.read(frame)) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to read frame from video.");
+            return ColorRangeHSV::ColorType::CANTIDTIFY;
+        }
 
-        cv::Mat image_received = cv_bridge::toCvShare(msg, "bgr8")->image;
-        cv::cvtColor(image_received, image_received, cv::COLOR_BGR2RGB);
-        cv::flip(image_received, image_received, 0);
+        cv::Mat processed_image = post_process_image(frame);
 
-        cv::Mat adjusted_image = post_process_image(image_received);
-        cv::Mat b_image, g_image, r_image, gray_image;
-
-        ColorRangeHSV color_range;
-        cv::Mat hsv_image;
-        cv::cvtColor(adjusted_image, hsv_image, cv::COLOR_BGR2HSV);
-        b_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::BLUE);
-        g_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::GREEN);
-        r_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::RED);
-
-        cv::cvtColor(adjusted_image, gray_image, cv::COLOR_BGR2GRAY);
-        cv::threshold(gray_image, gray_image, 150, 255, cv::THRESH_BINARY);
-
-        cv::Mat edges = find_edges(r_image);
-        std::vector<LineType> lines = find_lines(edges);
-        std::vector<cv::Point3f> circles = find_circles(edges);
-
-        cv::Mat output_image = visualize(adjusted_image, lines, circles);
-
-        cv::imshow("Processed Image", output_image);
-        cv::imshow("Edges", edges);
-        cv::imshow("Blue Channel", b_image);
-        // cv::imshow("Green Channel", g_image);
-        // cv::imshow("Red Channel", r_image);
-
-        cv::waitKey(1);
+        cv::imshow("image", processed_image);
+        cv::waitKey(0);
+        auto color = get_color(processed_image, cv::Point2f(processed_image.cols / 2.0f, processed_image.rows / 2.0f), 200.0f);
+        return color;
     };
 
 private:
     cv::Mat post_process_image(const cv::Mat& image)
     {
-        // cv::Mat blurred_image;
-        // cv::GaussianBlur(image, blurred_image, cv::Size(5, 5), 0);
         cv::Mat adjusted_image;
-        cv::convertScaleAbs(image, adjusted_image, 1.5, 30);
-
-        cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-        cv::erode(adjusted_image, adjusted_image, kernel);
-        cv::dilate(adjusted_image, adjusted_image, kernel);
+        // alpha: the contrast control (<1.0: decrease contrast, >1.0: increase contrast)
+        // beta: the brightness control
+        cv::convertScaleAbs(image, adjusted_image, 1.5, 1);
 
         return adjusted_image;
     };
 
+    ColorRangeHSV::ColorType get_color(cv::Mat& image, const cv::Point2f& point, const float& radius)
+    {
+        cv::Mat b_image, g_image, r_image;
+
+        ColorRangeHSV color_range;
+        cv::Mat hsv_image;
+        cv::cvtColor(image, hsv_image, cv::COLOR_BGR2HSV);
+        b_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::BLUE);
+        g_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::GREEN);
+        r_image = color_range.get_mask(hsv_image, ColorRangeHSV::ColorType::RED);
+
+        cv::Rect roi = cv::Rect(point.x - radius, point.y - radius, radius * 2, radius * 2);
+        cv::rectangle(image, roi, cv::Scalar(255, 0, 0), 1);
+
+        b_image = b_image(roi);
+        g_image = g_image(roi);
+        r_image = r_image(roi);
+        int b_count = cv::countNonZero(b_image);
+        int g_count = cv::countNonZero(g_image);
+        int r_count = cv::countNonZero(r_image);
+
+        if (b_count > g_count && b_count > r_count) {
+            return ColorRangeHSV::ColorType::BLUE;
+        } else if (g_count > b_count && g_count > r_count) {
+            return ColorRangeHSV::ColorType::GREEN;
+        } else if (r_count > b_count && r_count > g_count) {
+            return ColorRangeHSV::ColorType::RED;
+        }
+        return ColorRangeHSV::ColorType::CANTIDTIFY;
+    };
+
     cv::Mat find_edges(const cv::Mat& image)
     {
+        cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+        cv::erode(image, image, kernel);
+        cv::dilate(image, image, kernel);
+
         cv::Mat edges;
         cv::Canny(image, edges, 50, 150, 3);
 

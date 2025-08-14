@@ -16,6 +16,7 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(serial REQUIRED)
 
 file(GLOB FUNCTIONS_SOURCE src/*.cpp)
 
@@ -25,7 +26,7 @@ add_executable(
   ${FUNCTIONS_SOURCE}
 )
 
-ament_target_dependencies(${PROJECT_NAME} rclcpp std_msgs sensor_msgs cv_bridge OpenCV)
+ament_target_dependencies(${PROJECT_NAME} rclcpp std_msgs sensor_msgs cv_bridge OpenCV serial)
 
 install(TARGETS
   ${PROJECT_NAME}
