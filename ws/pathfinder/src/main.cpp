@@ -12,20 +12,20 @@ int main()
 
     rclcpp::executors::SingleThreadedExecutor rcl_executor;
 
-    auto image_processer = std::make_shared<image::ImageProcesser>("ImageProcesser", 30);
-    image_processer->start();
+    // auto image_processer = std::make_shared<image::ImageProcesser>("ImageProcesser", 30);
+    // image_processer->start();
 
     // auto message_handler = std::make_shared<message::MessageHandler>("MessageHandler", 1);
     // message_handler->start();
-    auto serial_handler = std::make_shared<SerialHandler::SerialHandler>("SerialHandler", 30);
+    auto serial_handler = std::make_shared<SerialHandler::SerialHandler>("SerialHandler", 1);
     serial_handler->start();
 
-    auto state_machine = std::make_shared<state_machine::StateMachine>("StateMachine", 30, image_processer);
-    state_machine->start();
+    // auto state_machine = std::make_shared<state_machine::StateMachine>("StateMachine", 30, image_processer);
+    // state_machine->start();
 
     // rcl_executor.add_node(message_handler);
-    rcl_executor.add_node(image_processer);
-    rcl_executor.add_node(state_machine);
+    // rcl_executor.add_node(image_processer);
+    // rcl_executor.add_node(state_machine);
     rcl_executor.add_node(serial_handler);
 
     rcl_executor.spin();

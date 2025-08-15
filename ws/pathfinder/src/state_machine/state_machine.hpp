@@ -3,8 +3,8 @@
 #include "../image_process/image_processer.hpp"
 #include "../include/monobehaviour.hpp"
 
+#include "../serial/serial_defination.hpp"
 #include "state_defines.hpp"
-#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <deque>
@@ -85,12 +85,11 @@ private:
         std_msgs::msg::Float32MultiArray command_msg;
         std_msgs::msg::Float32MultiArray velocity_msg;
         std_msgs::msg::Float32MultiArray palstance_msg;
-        command_msg.data = { command_id_ };
+        float embedded_cmd = static_cast<float>(serial_package::recast_cmd[command_id_]);
+        command_msg.data = { embedded_cmd };
         velocity_msg.data = { velocity_.x, velocity_.y };
-        palstance_msg.data = { palstance_ };
         command_publisher_->publish(command_msg);
         velocity_publisher_->publish(velocity_msg);
-        palstance_publisher_->publish(palstance_msg);
 
         RCLCPP_INFO(this->get_logger(), "[Updating environment][stage-%d]", static_cast<int>(current_stage_));
     }
@@ -121,10 +120,10 @@ private:
     StageType current_stage_ = StageType::STARTUP;
     cv::Point2f current_location_ = { 0.0f, 0.0f };
     cv::Point2f velocity_ = { 0.0f, 0.0f };
-    float palstance_ = 0;
+    float target_rotation_angle_add_pi_ = -404.0f;
     float current_rotation_angle_ = 0.0f;
-    float command_id_ = 0.0f;
-    float response_id_ = 0.0f;
+    CommandType command_id_;
+    int response_id_ = 0;
 
     std::deque<image::Colors::ColorType> forward_clamped_colors_;
 
@@ -147,8 +146,6 @@ private:
         = NOTSTART;
     WorkingState clamp_state_
         = NOTSTART;
-    WorkingState rotate_state_
-        = NOTSTART;
 
     struct Stage {
         int current_stage = 0;
@@ -160,10 +157,10 @@ private:
     };
 
     struct Behavior {
-        std::function<bool(DirectionType clamp_direction)> clamping;
+        std::function<bool(DirectionType clamp_direction, int clamp_type)> clamping;
         std::function<bool(DirectionType move_direction, cv::Point2f target)> moving;
         std::function<bool(DirectionType place_direction)> placing;
-        std::function<bool(DeviceType device)> rotating;
+        std::function<bool()> rotating_self;
         std::function<void()> idle;
     };
 
@@ -175,7 +172,23 @@ void inline StateMachine::initialize()
 {
     // initialize behaviors
     behaviors_ = {
-        [this](DirectionType clamp_direction) {
+        [this](DirectionType clamp_direction, int clamp_style = 1) {
+            // clamp_type: 1.clamp one / 2.clamp multiple / 3.clamp except bottom one
+            CommandType clamp_type;
+            switch (clamp_style) {
+            case 1:
+                clamp_type = CommandType::FCLAMPONE;
+                break;
+            case 2:
+                clamp_type = CommandType::FCLAMPTWO;
+                break;
+            case 3:
+                clamp_type = CommandType::FCLAMPUP;
+                break;
+            default:
+                clamp_type = CommandType::FCLAMPONE;
+            }
+
             switch (clamp_state_) {
             case NOTSTART: {
                 RCLCPP_INFO(this->get_logger(), "Clamping started.");
@@ -187,14 +200,14 @@ void inline StateMachine::initialize()
                     }
                     forward_clamped_colors_.push_back(front_color);
                 }
-                command_id_ = static_cast<float>((clamp_direction == DirectionType::FORWARD) ? CommandType::FCLAMP : CommandType::BCLAMP);
+                command_id_ = (clamp_direction == DirectionType::FORWARD) ? clamp_type : CommandType::BCLAMP;
                 clamp_state_ = WORKING;
                 return false;
             }
             case WORKING:
-                if (response_id_ == static_cast<float>((clamp_direction == DirectionType::FORWARD) ? CommandType::FCLAMP : CommandType::BCLAMP)) {
+                if (response_id_ == static_cast<float>((clamp_direction == DirectionType::FORWARD) ? clamp_type : CommandType::BCLAMP)) {
                     clamp_state_ = COMPLETED;
-                    command_id_ = 0.0f;
+                    command_id_ = CommandType::IDLE;
                 }
                 return false;
             case COMPLETED:
@@ -209,28 +222,31 @@ void inline StateMachine::initialize()
                 move_direction == DirectionType::FORWARD ? "FORWARD" : "BACKWARD",
                 target.x, target.y);
 
+            command_id_ = CommandType::IDLE;
+
             cv::Point2f direction = target - current_location_;
             float cur_rot_rad = (current_rotation_angle_ + 90.0f) / 180.0f * std::numbers::pi;
             cv::Point2f current_dir = { std::cos(cur_rot_rad),
                 std::sin(cur_rot_rad) };
 
             float rotate = current_dir.x * direction.y - direction.x * current_dir.y;
-            if (rotate > 0.01)
-                palstance_ = 1;
-            else if (rotate < -0.01)
-                palstance_ = -1;
+            if (rotate > 0.01) {
+                command_id_ = CommandType::LROT;
+            } else if (rotate < -0.01)
+                command_id_ = CommandType::RROT;
             else
-                palstance_ = 0;
+                command_id_ = CommandType::IDLE;
 
             if (distance(current_location_, target) < 0.1f) {
                 RCLCPP_INFO(this->get_logger(), "Already at target location.");
                 velocity_ = { 0.0f, 0.0f };
                 return true;
-            } else if (palstance_ != 0) {
+            } else if (command_id_ != CommandType::IDLE) {
                 velocity_ = { 0.0f, 0.0f };
                 return false;
             } else {
                 velocity_ = (target - current_location_) * 0.1f;
+                command_id_ = velocity_.y > 0 ? CommandType::FMOVE : CommandType::BMOVE;
             }
             return false;
         },
@@ -239,13 +255,13 @@ void inline StateMachine::initialize()
             case NOTSTART:
                 RCLCPP_INFO(this->get_logger(), "Placing started.");
                 // placing action
-                command_id_ = static_cast<float>((place_direction == DirectionType::FORWARD) ? CommandType::FPLACE : CommandType::BPLACE);
+                command_id_ = (place_direction == DirectionType::FORWARD) ? CommandType::FPLACE : CommandType::BPLACE;
                 place_state_ = WORKING;
                 return false;
             case WORKING:
                 if (response_id_ == static_cast<float>((place_direction == DirectionType::FORWARD) ? CommandType::FPLACE : CommandType::BPLACE)) {
                     place_state_ = COMPLETED;
-                    command_id_ = 0.0f;
+                    command_id_ = CommandType::IDLE;
                     if (place_direction == DirectionType::FORWARD) {
                         forward_clamped_colors_.pop_front();
                     }
@@ -258,25 +274,27 @@ void inline StateMachine::initialize()
             }
             return false;
         },
-        [this](DeviceType device) {
-            RCLCPP_INFO(this->get_logger(), "Rotating device: %s",
-                device == DeviceType::CAMERA ? "CAMERA" : "CAR");
-            switch (rotate_state_) {
-            case NOTSTART:
-                RCLCPP_INFO(this->get_logger(), "Rotation started.");
-                // rotation action
-                command_id_ = static_cast<float>((device == DeviceType::CAMERA) ? CommandType::ROTCAM : CommandType::ROTCAR);
-                rotate_state_ = WORKING;
-                return false;
-            case WORKING:
-                if (response_id_ == static_cast<float>((device == DeviceType::CAMERA) ? CommandType::ROTCAM : CommandType::ROTCAR)) {
-                    rotate_state_ = COMPLETED;
-                    command_id_ = 0.0f;
-                }
-                return false;
-            case COMPLETED:
-                RCLCPP_INFO(this->get_logger(), "Already rotated, no action needed.");
-                rotate_state_ = NOTSTART; // Reset state after completion
+        [this]() {
+            RCLCPP_INFO(this->get_logger(), "Rotation started.");
+            // rotation action
+            if (target_rotation_angle_add_pi_ == -404.0f)
+                target_rotation_angle_add_pi_ = static_cast<float>(static_cast<int>(current_rotation_angle_ + 180.2f) % 360)
+                    / 180.0f * std::numbers::pi;
+
+            cv::Point2f direction = { std::cos(target_rotation_angle_add_pi_),
+                std::sin(target_rotation_angle_add_pi_) };
+            float cur_rot_rad = current_rotation_angle_ / 180.0f * std::numbers::pi;
+            cv::Point2f current_dir = { std::cos(cur_rot_rad),
+                std::sin(cur_rot_rad) };
+
+            float rotate = current_dir.x * direction.y - direction.x * current_dir.y;
+            if (rotate > 0.01) {
+                command_id_ = CommandType::LROT;
+            } else if (rotate < -0.01)
+                command_id_ = CommandType::RROT;
+            else {
+                command_id_ = CommandType::IDLE;
+                target_rotation_angle_add_pi_ = -404.0f;
                 return true;
             }
             return false;
@@ -313,7 +331,7 @@ void inline StateMachine::initialize()
                 return behaviors_.moving(DirectionType::FORWARD, Locations.APOINT);
             },
             [this] {
-                return behaviors_.clamping(DirectionType::FORWARD);
+                return behaviors_.clamping(DirectionType::FORWARD, 1);
             },
             [this] {
                 return behaviors_.moving(DirectionType::FORWARD, Locations.CENTERTARGET);
@@ -322,7 +340,7 @@ void inline StateMachine::initialize()
                 return behaviors_.moving(DirectionType::FORWARD, Locations.CPOINT);
             },
             [this] {
-                return behaviors_.clamping(DirectionType::FORWARD);
+                return behaviors_.clamping(DirectionType::FORWARD, 2);
             },
             [this] {
                 return behaviors_.moving(DirectionType::FORWARD, Locations.CENTERTARGET);
@@ -331,7 +349,7 @@ void inline StateMachine::initialize()
                 return behaviors_.moving(DirectionType::FORWARD, Locations.EPOINT);
             },
             [this] {
-                return behaviors_.clamping(DirectionType::FORWARD);
+                return behaviors_.clamping(DirectionType::FORWARD, 2);
             },
             [this] {
                 return behaviors_.moving(DirectionType::FORWARD, Locations.CENTERTARGET);
@@ -357,15 +375,18 @@ void inline StateMachine::initialize()
     };
     stages_[StageType::PLACE_A_C_E_POINT] = {
         0,
-        { 0, 1, 0, 1, 0, 1 },
+        { 0, 1, 2, 0, 1, 2, 0, 1 },
         {
+
             [this] {
                 return behaviors_.moving(DirectionType::FORWARD, color_to_point_[forward_clamped_colors_.front()]);
             },
             [this] {
                 return behaviors_.placing(DirectionType::FORWARD);
             },
-        },
+            [this] {
+                return behaviors_.clamping(DirectionType::FORWARD, 3);
+            } },
 
         [] {
 
@@ -401,16 +422,16 @@ void inline StateMachine::initialize()
                 return behaviors_.moving(DirectionType::FORWARD, Locations.FPOINT);
             },
             [this] {
-                return behaviors_.rotating(DeviceType::CAR);
+                return behaviors_.rotating_self();
             },
             [this] {
-                return behaviors_.clamping(DirectionType::BACKWARD);
+                return behaviors_.clamping(DirectionType::BACKWARD, 1);
             },
             [this] {
                 return behaviors_.placing(DirectionType::BACKWARD);
             },
             [this] {
-                return behaviors_.clamping(DirectionType::FORWARD);
+                return behaviors_.clamping(DirectionType::FORWARD, 1);
             },
             [this] {
                 return behaviors_.placing(DirectionType::FORWARD);
@@ -455,16 +476,16 @@ void inline StateMachine::initialize()
                 return behaviors_.moving(DirectionType::FORWARD, Locations.GPOINT);
             },
             [this] {
-                return behaviors_.rotating(DeviceType::CAR);
+                return behaviors_.rotating_self();
             },
             [this] {
-                return behaviors_.clamping(DirectionType::BACKWARD);
+                return behaviors_.clamping(DirectionType::BACKWARD, 1);
             },
             [this] {
                 return behaviors_.placing(DirectionType::BACKWARD);
             },
             [this] {
-                return behaviors_.clamping(DirectionType::FORWARD);
+                return behaviors_.clamping(DirectionType::FORWARD, 1);
             },
             [this] {
                 return behaviors_.placing(DirectionType::FORWARD);
@@ -505,7 +526,7 @@ void inline StateMachine::initialize()
         {
 
             [this] {
-                return behaviors_.clamping(DirectionType::FORWARD);
+                return behaviors_.clamping(DirectionType::FORWARD, 2);
             },
             [this] {
                 return behaviors_.placing(DirectionType::FORWARD);

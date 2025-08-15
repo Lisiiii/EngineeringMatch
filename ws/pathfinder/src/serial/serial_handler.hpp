@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../include/monobehaviour.hpp"
+#include "../state_machine/state_defines.hpp"
 #include "serial_defination.hpp"
+#include <cstdint>
 #include <memory>
 
 #include <rclcpp/subscription.hpp>
@@ -40,12 +42,12 @@ public:
             sleep(1);
         }
 
-        velocity_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-            "/respi/velocity", 10,
-            std::bind(&SerialHandler::on_velocity_received, this, std::placeholders::_1));
-        rotation_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-            "/respi/palstance", 10,
-            std::bind(&SerialHandler::on_rotation_received, this, std::placeholders::_1));
+        // velocity_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
+        //     "/respi/velocity", 10,
+        //     std::bind(&SerialHandler::on_velocity_received, this, std::placeholders::_1));
+        // rotation_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
+        //     "/respi/palstance", 10,
+        //     std::bind(&SerialHandler::on_rotation_received, this, std::placeholders::_1));
         command_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
             "/respi/command", 10,
             std::bind(&SerialHandler::on_command_received, this, std::placeholders::_1));
@@ -56,8 +58,7 @@ public:
 
     void update() override
     {
-        std::vector<float> data_to_send = { command_id_, current_pos_rot_[0], current_pos_rot_[1], current_pos_rot_[2] };
-        publish_to_serial(data_to_send);
+        publish_to_serial();
         serial_package::PackageToReceive package;
         if (read_from_serial(package)) {
             response_id_ = static_cast<float>(package.command_id);
@@ -65,7 +66,7 @@ public:
     };
 
 private:
-    bool publish_to_serial(const std::vector<float>& data)
+    bool publish_to_serial()
     {
         if (serial_instance_ == nullptr) {
             RCLCPP_ERROR(get_logger(), "[x] Serial instance is not initialized!");
@@ -77,10 +78,9 @@ private:
         }
 
         serial_package::PackageToSend package;
-        package.command_id = data[0];
-        package.move_data[0] = data[1];
-        package.move_data[1] = data[2];
-        package.move_data[2] = data[3];
+        package.package_header = 0xA5;
+        package.command_id = command_id_;
+        package.data = 1;
 
         try {
             serial_instance_->write(
@@ -110,26 +110,36 @@ private:
             if (serial_instance_->available() < sizeof(package)) {
                 return false;
             }
+            uint8_t buffer[sizeof(package)];
+
             serial_instance_->read(
-                reinterpret_cast<uint8_t*>(&package),
+                buffer,
                 sizeof(package));
 
-            return true;
+            package = *reinterpret_cast<serial_package::PackageToReceive*>(buffer);
+
+            if (package.package_header == 0xA5) {
+                response_id_ = static_cast<float>(package.command_id);
+                RCLCPP_INFO(get_logger(), "[+] Received response: %d", package.command_id);
+
+                return true;
+            } else
+                return false;
         } catch (const serial::IOException& se) {
             RCLCPP_ERROR(get_logger(), "[x] Can't read from serial port!");
             RCLCPP_ERROR(get_logger(), "%s", se.what());
             return false;
         }
     };
-    void on_velocity_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
-    {
-        current_pos_rot_[0] = msg->data[0];
-        current_pos_rot_[1] = msg->data[1];
-    }
-    void on_rotation_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
-    {
-        current_pos_rot_[2] = msg->data[0];
-    }
+    // void on_velocity_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
+    // {
+    //     current_pos_rot_[0] = msg->data[0];
+    //     current_pos_rot_[1] = msg->data[1];
+    // }
+    // void on_rotation_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
+    // {
+    //     current_pos_rot_[2] = msg->data[0];
+    // }
     void on_command_received(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
     {
         command_id_ = msg->data[0];
@@ -137,12 +147,12 @@ private:
 
     std::shared_ptr<serial::Serial> serial_instance_;
 
-    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr velocity_subscription_;
-    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr rotation_subscription_;
+    // rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr velocity_subscription_;
+    // rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr rotation_subscription_;
     rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr command_subscription_;
     rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr response_publisher_;
-    float current_pos_rot_[3] = { 0.0f, 0.0f, 0.0f };
-    float command_id_ = 0.0f;
-    float response_id_ = 0.0f;
+    // float current_pos_rot_[3] = { 0.0f, 0.0f, 0.0f };
+    int command_id_ = 0.0f;
+    int response_id_ = 0.0f;
 };
 }

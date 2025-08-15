@@ -2,15 +2,28 @@
 
 #include "../image_process/image_processer.hpp"
 #include <opencv2/core/types.hpp>
+#include <unordered_map>
 namespace engineering_match::state_machine {
 
 enum class CommandType {
-    FCLAMP = 1,
-    BCLAMP = 2,
-    FPLACE = 3,
-    BPLACE = 4,
-    ROTCAM = 5,
-    ROTCAR = 6,
+    IDLE = 0,
+    FMOVE = 1,
+    BMOVE = 2,
+    LMOVE = 3,
+    RMOVE = 4,
+    LFMOVE = 5,
+    RFMOVE = 6,
+    LBMOVE = 7,
+    RBMOVE = 8,
+    LROT = 9,
+    RROT = 10,
+    STOP = 11,
+    FCLAMPONE = 12,
+    FCLAMPTWO = 13,
+    FCLAMPUP = 14,
+    BCLAMP = 15,
+    FPLACE = 16,
+    BPLACE = 17
 };
 
 enum class DirectionType {
